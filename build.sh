@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-package=cpbuilder.go
-package_name=cpbuilder
+package=dirdiff.go
+package_name=dirdiff
 
 platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
 
