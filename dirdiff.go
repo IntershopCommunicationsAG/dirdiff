@@ -126,8 +126,8 @@ func (config *Config) copyFiles() error {
 
 func filecopy(path, absSrc, procTarget, absProc string) error {
 	copypath := strings.Replace(path, absSrc, procTarget, 1)
-	result, err := basecopy(path, copypath)
-	if result == 0 || err != nil {
+	_, err := basecopy(path, copypath)
+	if err != nil {
 		return errors.New("It was not possible to filecopy file '" + path + "'")
 	} else {
 		fmt.Println(strings.Replace(path, absSrc, ".", 1), " was copied to ", strings.Replace(copypath, absProc, ".", 1))
@@ -138,25 +138,28 @@ func filecopy(path, absSrc, procTarget, absProc string) error {
 func basecopy(src, dst string) (int64, error) {
 	source, err := os.Open(src)
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 	defer source.Close()
 
 	dstDir := filepath.Dir(dst)
 	if !FileExists(dstDir) {
 		if err := os.MkdirAll(dstDir, 0777); err != nil {
-			return 0, errors.New("failed to create directory: '" + dstDir + "', error: '" + err.Error() + "'")
+			return -1, errors.New("failed to create directory: '" + dstDir + "', error: '" + err.Error() + "'")
 		}
 	}
 
 	destination, err := os.Create(dst)
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 	defer destination.Close()
 
 	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
+	if err != nil {
+		return -1, err
+	}
+	return nBytes, nil
 }
 
 func FileExists(path string) bool {
