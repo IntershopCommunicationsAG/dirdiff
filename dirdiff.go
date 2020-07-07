@@ -34,12 +34,14 @@ var (
 	paramSrcDir    = command.String("srcdir", "", "Source directory for comparison")
 	paramTargetDir = command.String("targetdir", "", "Target directory for comparison")
 	paramProcDir   = command.String("diffdir", "", "Directory with diff files to copy s to the final target")
+	paramVerbose   = command.Bool("v", false, "Enable verbose output")
 )
 
 type Config struct {
 	srcdir    string
 	targetdir string
 	diffdir   string
+	verbose   bool
 }
 
 func (config *Config) ParseCommandLine() {
@@ -64,6 +66,7 @@ func (config *Config) ParseCommandLine() {
 	config.srcdir = *paramSrcDir
 	config.targetdir = *paramTargetDir
 	config.diffdir = *paramProcDir
+	config.verbose = *paramVerbose
 }
 
 func (config *Config) copyFiles() error {
@@ -101,13 +104,13 @@ func (config *Config) copyFiles() error {
 					hashSrc, errSrc := GetSha256(path)
 					hashTarget, errTarget := GetSha256(newpath)
 					if errSrc != nil || errTarget != nil || hashSrc != hashTarget {
-						err := filecopy(path, absSrc, procTarget, absProc)
+						err := filecopy(path, absSrc, procTarget, absProc, config.verbose)
 						if err != nil {
 							return err
 						}
 					}
 				} else {
-					err := filecopy(path, absSrc, procTarget, absProc)
+					err := filecopy(path, absSrc, procTarget, absProc, config.verbose)
 					if err != nil {
 						return err
 					}
@@ -124,13 +127,15 @@ func (config *Config) copyFiles() error {
 	return err
 }
 
-func filecopy(path, absSrc, procTarget, absProc string) error {
+func filecopy(path, absSrc, procTarget, absProc string, verbose bool) error {
 	copypath := strings.Replace(path, absSrc, procTarget, 1)
 	_, err := basecopy(path, copypath)
 	if err != nil {
 		return errors.New("It was not possible to filecopy file '" + path + "'")
 	} else {
-		fmt.Println(strings.Replace(path, absSrc, ".", 1), " was copied to ", strings.Replace(copypath, absProc, ".", 1))
+		if verbose == true {
+			fmt.Println(strings.Replace(path, absSrc, ".", 1), " was copied to ", strings.Replace(copypath, absProc, ".", 1))
+		}
 	}
 	return nil
 }

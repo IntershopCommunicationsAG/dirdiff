@@ -79,6 +79,29 @@ func TestParseCommand(t *testing.T) {
 	if m.diffdir != "/path/to/diffdir" {
 		t.Errorf("Diff-directory setting is not ok. It is %s and should be %s", m.diffdir, "/path/to/diffdir")
 	}
+	if m.verbose == true {
+		t.Errorf("Verbose is not set.")
+	}
+}
+
+func TestParseCommandVerbose(t *testing.T) {
+	os.Args = []string{"command", "--srcdir=/path/to/srcdir", "--targetdir=/path/to/targetdir", "--diffdir=/path/to/diffdir", "-v"}
+	m := &Config{}
+	m.ParseCommandLine()
+
+	if m.srcdir != "/path/to/srcdir" {
+		t.Errorf("Src-directory setting is not ok. It is %s and should be %s", m.srcdir, "/path/to/srcdir")
+	}
+	if m.targetdir != "/path/to/targetdir" {
+		t.Errorf("Target-directory setting is not ok. It is %s and should be %s", m.targetdir, "/path/to/targetdir")
+	}
+	if m.diffdir != "/path/to/diffdir" {
+		t.Errorf("Diff-directory setting is not ok. It is %s and should be %s", m.diffdir, "/path/to/diffdir")
+	}
+
+	if m.verbose != true {
+		t.Errorf("Verbose is not configured.")
+	}
 }
 
 func setupChangedFile() {
